@@ -151,10 +151,6 @@ namespace RecetasApi.Àpi.Controllers.Àpi
                     token = myToken
                 }, protocol: HttpContext.Request.Scheme);
 
-                //_mailHelper.SendMail(user.Email, "Confirmación de cuenta", $"<h1>Confirmación de cuenta</h1>" +
-                //    $"Para habilitar el usuario, " +
-                //    $"por favor hacer clic en el siguiente enlace: </br></br><a href = \"{tokenLink}\">Confirmar Email</a>");
-
                 _mailHelper.SendMail(user.Email, "Confirmación de Email",
                    $"<table style = 'max-width: 800px; padding: 10px; margin:0 auto; border-collapse: collapse;'>" +
                    $"  <tr>" +
@@ -163,18 +159,8 @@ namespace RecetasApi.Àpi.Controllers.Àpi
                    $"<tr>" +
                    $" <td style = 'background-color: #ecf0f1'>" +
                    $"      <div style = 'color: #3658a8; margin: 4% 10% 2%; text-align: justify;font-family: sans-serif'>" +
-                   $"            <h1 style = 'color: #e67e22; margin: 0 0 7px' > Keypress - Recetas </h1>" +
+                   $"            <h1 style = 'color: #e67e22; margin: 0 0 7px' > Cookbook </h1>" +
                    $"                    <p style = 'margin: 2px; font-size: 15px'>" +
-                   $"                      Para completar el registro de su Usuario y Direcciones usted debe realizar los siguientes pasos:<br>" +
-                   $"      <ul style = 'font-size: 15px;  margin: 10px 0'>" +
-                   $"        <li> Confirmar la dirección de Email haciendo clic en el botón del final de este mail.</li>" +
-                   $"        <li> Ingresar a la App con el Usuario y Contraseña con que se ha registrado.</li>" +
-                   $"        <li> En la App debe al menos registrar una Dirección.</li>" +
-                   
-                   $"      </ul>" +
-                   $"  <div style = 'width: 100%;margin:5px 0; display: inline-block;text-align: center'>" +
-                   $"  </div>" +
-                   $"  <div style = 'width: 100%; text-align: center'>" +
                    $"    <h2 style = 'color: #e67e22; margin: 0 0 5px' >Confirmación de Email</h2>" +
                    $"    Para habilitar el usuario, por favor hacer clic en el siguiente enlace: </ br ></ br > " +
                    $"    <a style ='text-decoration: none; border-radius: 5px; padding: 5px 5px; color: white; background-color: #3658a8' href = \"{tokenLink}\">Confirmar Email</a>" +
