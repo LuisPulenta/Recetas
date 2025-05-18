@@ -163,6 +163,7 @@ namespace RecetasApi.Àpi.Controllers.Àpi
                    $"                    <p style = 'margin: 2px; font-size: 15px'>" +
                    $"    <h2 style = 'color: #e67e22; margin: 0 0 5px' >Confirmación de Email</h2>" +
                    $"    Para habilitar el usuario, por favor hacer clic en el siguiente enlace: </ br ></ br > " +
+                   $"     </ br ></ br > " +
                    $"    <a style ='text-decoration: none; border-radius: 5px; padding: 5px 5px; color: white; background-color: #3658a8' href = \"{tokenLink}\">Confirmar Email</a>" +
                    $"    <p style = 'color: #b3b3b3; font-size: 12px; text-align: center;margin: 10px 0 0' > Keypress Software</p>" +
                    $"  </div>" +
