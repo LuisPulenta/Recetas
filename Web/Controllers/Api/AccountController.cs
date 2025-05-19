@@ -262,11 +262,17 @@ namespace RecetasApi.Àpi.Controllers.Àpi
             {
                 return BadRequest("No existe el usuario.");
             }
-            
+
+            string imageId = user.Photo;
+
+            if (request.Image != null && request.Image.Length > 0)
+            {
+                imageId = _imageHelper.UploadImage(request.Image, "users");
+            }
+
             user.Document = request.Document;
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
-            //TODO Falta la foto
             
             await _userHelper.UpdateUserAsync(user);
             return NoContent();
