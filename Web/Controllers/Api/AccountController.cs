@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Common.Models;
 
 namespace RecetasApi.Àpi.Controllers.Àpi
 {
@@ -182,36 +183,47 @@ namespace RecetasApi.Àpi.Controllers.Àpi
         }
 
         //---------------------------------------------------------------------------------
-        [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
         [Route("ChangePassword")]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                string email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-                User user = await _userHelper.GetUserAsync(email);
-                if (user != null)
+                return BadRequest(new Response
                 {
-                    IdentityResult result = await _userHelper.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-                    if (result.Succeeded)
-                    {
-                        await _context.SaveChangesAsync();
-
-                        return NoContent();
-                    }
-                    else
-                    {
-                        return BadRequest(result.Errors.FirstOrDefault().Description);
-                    }
-                }
-                else
-                {
-                    return BadRequest("Usuario no encontrado.");
-                }
+                    IsSuccess = false,
+                    Message = "Bad request",
+                    Result = ModelState
+                });
             }
 
-            return BadRequest(ModelState);
+
+            User user = await _userHelper.GetUserAsync(request.Email);
+            if (user == null)
+            {
+                return BadRequest(new Response
+                {
+                    IsSuccess = false,
+                    Message = "Usuario no encontrado"
+                });
+            }
+
+            IdentityResult result = await _userHelper.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
+            if (!result.Succeeded)
+            {
+                return BadRequest(new Response
+                {
+                    IsSuccess = false,
+                    Message = result.Errors.FirstOrDefault().Description
+                });
+            }
+
+            return Ok(new Response
+            {
+                IsSuccess = true,
+                Message = "El password fue cambiado con éxito."
+            });
         }
 
         //---------------------------------------------------------------------------------
