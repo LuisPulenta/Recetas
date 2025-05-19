@@ -273,7 +273,8 @@ namespace RecetasApi.Àpi.Controllers.Àpi
             user.Document = request.Document;
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
-            
+            user.Photo = imageId;
+
             await _userHelper.UpdateUserAsync(user);
             return NoContent();
         }
