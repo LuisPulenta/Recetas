@@ -14,6 +14,7 @@ namespace Web.Data
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<Step> Steps { get; set; }
         public DbSet<FavoriteRecipe> FavoriteRecipes { get; set; }
+        public object TicketCabs { get; internal set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
