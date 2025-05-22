@@ -30,6 +30,7 @@ namespace Recetas.Web.Controllers.Api
             _imageHelper = imageHelper;
         }
 
+
         //-----------------------------------------------------------------------------------
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Recipe>>> GetRecipes()
