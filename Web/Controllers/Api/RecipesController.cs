@@ -37,10 +37,33 @@ namespace Recetas.Web.Controllers.Api
             List<Recipe> recipes = await _context.Recipes
                 .Include(x => x.Ingredients)
                 .Include(x => x.Steps)
+                .Include(x => x.User)
               .OrderBy(x => x.Name)
-              .ToListAsync();            
+              .ToListAsync();
 
-            return Ok(recipes);
+            List<RecipeViewModel> recipesViewModel = new List<RecipeViewModel>();
+
+            foreach (Recipe recipe in recipes)
+            {
+                RecipeViewModel recipeViewModel = new RecipeViewModel
+                {
+                    Id = recipe.Id,
+                    Name = recipe.Name,
+                    UserId = recipe.User.Id,
+                    UserName = recipe.User.FullName,
+                    Description = recipe.Description,
+                    Photo=recipe.Photo,
+                    Ingredients = recipe.Ingredients?.Select(ingredient => ingredient.Description).ToList(),
+                    Steps = recipe.Steps?.Select(step => new StepRequest
+                    {
+                        Number = step.number,
+                        Description = step.Description,
+                    }).ToList(),
+                };
+                recipesViewModel.Add(recipeViewModel);
+            }
+
+            return Ok(recipesViewModel);
         }
 
         
