@@ -151,11 +151,27 @@ namespace Recetas.Web.Controllers.Api
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipe(int id)
         {
-            Recipe recipe = await _context.Recipes.FindAsync(id);
+            Recipe recipe = await _context.Recipes
+               .Include(x => x.Ingredients)
+               .Include(x => x.Steps)
+               .FirstOrDefaultAsync(x => x.Id == id);
+
             if (recipe == null)
             {
                 return NotFound();
             }
+
+            foreach (Ingredient ingredient in recipe.Ingredients)
+            {
+                _context.Ingredients.Remove(ingredient);
+                await _context.SaveChangesAsync();
+            }
+
+            foreach (Step step in recipe.Steps)
+            {
+                _context.Steps.Remove(step);
+                await _context.SaveChangesAsync();
+            }            
 
             _context.Recipes.Remove(recipe);
             await _context.SaveChangesAsync();
