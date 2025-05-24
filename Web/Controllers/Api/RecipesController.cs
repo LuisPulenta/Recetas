@@ -68,7 +68,41 @@ namespace Recetas.Web.Controllers.Api
             return Ok(recipesViewModel);
         }
 
-        
+        //-----------------------------------------------------------------------------------
+        [HttpPost]
+        [Route("GetRecipeById")]
+        public async Task<IActionResult> GetRecipeById(int id)
+        {
+            Recipe recipe = await _context.Recipes
+               .Include(x => x.Ingredients)
+               .Include(x => x.Steps)
+               .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (recipe == null)
+            {
+                return NotFound();
+            }
+
+            RecipeViewModel recipeViewModel = new RecipeViewModel
+            {
+                Id = recipe.Id,
+                Name = recipe.Name,
+                UserId = recipe.User.Id,
+                UserName = recipe.User.FullName,
+                Description = recipe.Description,
+                Photo = recipe.Photo,
+                Ingredients = recipe.Ingredients?.Select(ingredient => ingredient.Description).ToList(),
+                Steps = recipe.Steps?.Select(step => new StepRequest
+                {
+                    Number = step.number,
+                    Description = step.Description,
+                }).ToList(),
+            };
+
+            return Ok(recipeViewModel);
+        }
+
+
         //-----------------------------------------------------------------------------------
         [HttpPost]
         [Route("CreateRecipe")]
