@@ -22,12 +22,13 @@ namespace Recetas.Web.Controllers.Api
     {
         private readonly DataContext _context;
         private readonly IImageHelper _imageHelper;
-        
+        private readonly IUserHelper _userHelper;
 
-        public RecipesController(DataContext context, IImageHelper imageHelper)
+        public RecipesController(DataContext context, IImageHelper imageHelper, IUserHelper userHelper)
         {
             _context = context;
             _imageHelper = imageHelper;
+            _userHelper = userHelper;
         }
 
 
@@ -176,6 +177,74 @@ namespace Recetas.Web.Controllers.Api
             _context.Recipes.Remove(recipe);
             await _context.SaveChangesAsync();
 
+            return NoContent();
+        }
+        //-------------------------------------------------------------------------------------------------
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutRecipe(int id, RecipeRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != request.Id)
+            {
+                return BadRequest();
+            }
+
+            Recipe recipe = await _context.Recipes
+              .Include(x => x.Ingredients)
+              .Include(x => x.Steps)
+              .FirstOrDefaultAsync(x => x.Id == id);
+
+            string imageId = recipe.Photo;
+
+            if (request.Image != null && request.Image.Length > 0)
+            {
+                imageId = _imageHelper.UploadImage(request.Image, "recipes");
+            }
+
+            recipe.Name = request.Name;
+            recipe.Description = request.Description;
+            recipe.Photo = imageId;
+
+            //Borramos los ingredientes que había en la BD
+            foreach (Ingredient ingredient in recipe.Ingredients)
+            {
+                _context.Ingredients.Remove(ingredient);
+                await _context.SaveChangesAsync();
+            }
+
+            //Borramos los pasos que había en la BD
+            foreach (Step step in recipe.Steps)
+            {
+                _context.Steps.Remove(step);
+                await _context.SaveChangesAsync();
+            }
+
+            //Grabamos nuevos Ingredientes en recipe
+            foreach (string ingredient in request.Ingredients)
+            {
+                recipe.Ingredients.Add(new Ingredient {
+                    Description = ingredient,
+                    Recipe = recipe,
+                });
+            }
+
+            //Grabamos nuevos Steps en recipe
+            foreach (StepRequest step in request.Steps)
+            {
+                recipe.Steps.Add(new Step
+                {
+                    number= step.Number,
+                    Description = step.Description,
+                    Recipe = recipe,
+                });
+            }
+
+            _context.Recipes.Update(recipe);
+            await _context.SaveChangesAsync();
             return NoContent();
         }
     }
