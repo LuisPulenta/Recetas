@@ -70,7 +70,7 @@ namespace Recetas.Web.Controllers.Api
 
         //-----------------------------------------------------------------------------------
         [HttpPost]
-        [Route("GetRecipeById")]
+        [Route("GetRecipeById/{id}")]
         public async Task<IActionResult> GetRecipeById(int id)
         {
             Recipe recipe = await _context.Recipes
