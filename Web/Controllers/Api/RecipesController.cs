@@ -76,6 +76,7 @@ namespace Recetas.Web.Controllers.Api
             Recipe recipe = await _context.Recipes
                .Include(x => x.Ingredients)
                .Include(x => x.Steps)
+               .Include(x => x.User)
                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (recipe == null)
