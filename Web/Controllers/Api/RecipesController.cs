@@ -359,7 +359,9 @@ namespace Recetas.Web.Controllers.Api
         public async Task<IActionResult> FavoritesByUser(string userId)
         {
             List<FavoriteRecipe> favoriteRecipes = await _context.FavoriteRecipes
-                 
+                .Include(x => x.Recipe)
+               .Include(x => x.User)
+
                  .Where(x => x.User.Id == userId)
                .ToListAsync();
 
