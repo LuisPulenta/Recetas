@@ -11,8 +11,6 @@ using Web.Data.Entities;
 using Web.Models.Request;
 using Web.Helpers;
 using Web.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Recetas.Web.Controllers.Api
 {
@@ -360,26 +358,39 @@ namespace Recetas.Web.Controllers.Api
         {
             List<FavoriteRecipe> favoriteRecipes = await _context.FavoriteRecipes
                 .Include(x => x.Recipe)
-               .Include(x => x.User)
+                .ThenInclude(x => x.User)
+                .Include(x => x.Recipe)
+                .ThenInclude(x => x.Ingredients)
+                .Include(x => x.Recipe)
+                .ThenInclude(x => x.Steps)
+                .Include(x => x.User)
 
                  .Where(x => x.User.Id == userId)
                .ToListAsync();
 
-            List<FavoriteRecipeViewModel> favoriteRecipesViewModel = new List<FavoriteRecipeViewModel>();
+            List<RecipeViewModel> recipesViewModel = new List<RecipeViewModel>();
 
             foreach (FavoriteRecipe favoriteRecipe in favoriteRecipes)
             {
-                FavoriteRecipeViewModel favoriteRecipeViewModel = new FavoriteRecipeViewModel
+                RecipeViewModel recipeViewModel = new RecipeViewModel
                 {
-                    Id = favoriteRecipe.Id,
-                    RecipeId = favoriteRecipe.Recipe.Id,
-                    UserId = favoriteRecipe.User.Id
+                    Id = favoriteRecipe.Recipe.Id,
+                    Name = favoriteRecipe.Recipe.Name,
+                    UserId = favoriteRecipe.Recipe.User.Id,
+                    UserName = favoriteRecipe.Recipe.User.FullName,
+                    Description = favoriteRecipe.Recipe.Description,
+                    Photo = favoriteRecipe.Recipe.Photo,
+                    Ingredients = favoriteRecipe.Recipe.Ingredients?.Select(ingredient => ingredient.Description).ToList(),
+                    Steps = favoriteRecipe.Recipe.Steps?.Select(step => new StepRequest
+                    {
+                        Number = step.number,
+                        Description = step.Description,
+                    }).ToList(),
                 };
-                favoriteRecipesViewModel.Add(favoriteRecipeViewModel);
+                recipesViewModel.Add(recipeViewModel);
             }
 
-            return Ok(favoriteRecipesViewModel);
-
+            return Ok(recipesViewModel);
         }
     }
 }
