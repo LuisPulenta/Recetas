@@ -324,7 +324,7 @@ namespace Recetas.Web.Controllers.Api
 
         //-----------------------------------------------------------------------------------
         [HttpPost]
-        [Route("MarkAsFavorite/{userId}/recipeId")]
+        [Route("MarkAsFavorite/{userId}/{recipeId}")]
         public async Task<IActionResult> MarkAsFavorite(string userId,int recipeId)
         {
             FavoriteRecipe favoriteRecipe = await _context.FavoriteRecipes
