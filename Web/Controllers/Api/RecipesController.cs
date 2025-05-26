@@ -11,6 +11,8 @@ using Web.Data.Entities;
 using Web.Models.Request;
 using Web.Helpers;
 using Web.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Recetas.Web.Controllers.Api
 {
@@ -358,15 +360,42 @@ namespace Recetas.Web.Controllers.Api
         {
             List<FavoriteRecipe> favoriteRecipes = await _context.FavoriteRecipes
                 .Include(x => x.Recipe)
-                .ThenInclude(x => x.User)
-                .Include(x => x.Recipe)
-                .ThenInclude(x => x.Ingredients)
-                .Include(x => x.Recipe)
-                .ThenInclude(x => x.Steps)
-                .Include(x => x.User)
+               .Include(x => x.User)
 
                  .Where(x => x.User.Id == userId)
                .ToListAsync();
+
+            List<FavoriteRecipeViewModel> favoriteRecipesViewModel = new List<FavoriteRecipeViewModel>();
+
+            foreach (FavoriteRecipe favoriteRecipe in favoriteRecipes)
+            {
+                FavoriteRecipeViewModel favoriteRecipeViewModel = new FavoriteRecipeViewModel
+                {
+                    Id = favoriteRecipe.Id,
+                    RecipeId = favoriteRecipe.Recipe.Id,
+                    UserId = favoriteRecipe.User.Id
+                };
+                favoriteRecipesViewModel.Add(favoriteRecipeViewModel);
+            }
+            return Ok(favoriteRecipesViewModel);
+        }
+
+        //-----------------------------------------------------------------------------------
+        [HttpGet]
+        [Route("GetMyFavoritesRecipes/{userId}")]
+        public async Task<ActionResult<IEnumerable<Recipe>>> GetMyFavoritesRecipes(string userId)
+        {
+            List<FavoriteRecipe> favoriteRecipes = await _context.FavoriteRecipes
+              .Include(x => x.Recipe)
+              .ThenInclude(x => x.Ingredients)
+              .Include(x => x.Recipe)
+                .ThenInclude(x => x.Steps)
+                .Include(x => x.Recipe)
+                .ThenInclude(x => x.User)
+             .Include(x => x.User)
+
+               .Where(x => x.User.Id == userId)
+             .ToListAsync();
 
             List<RecipeViewModel> recipesViewModel = new List<RecipeViewModel>();
 
@@ -389,7 +418,6 @@ namespace Recetas.Web.Controllers.Api
                 };
                 recipesViewModel.Add(recipeViewModel);
             }
-
             return Ok(recipesViewModel);
         }
     }
