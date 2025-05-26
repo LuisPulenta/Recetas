@@ -12,6 +12,7 @@ using Web.Models.Request;
 using Web.Helpers;
 using Web.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace Recetas.Web.Controllers.Api
 {
@@ -319,6 +320,64 @@ namespace Recetas.Web.Controllers.Api
             _context.Recipes.Update(recipe);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        //-----------------------------------------------------------------------------------
+        [HttpPost]
+        [Route("MarkAsFavorite/{userId}/recipeId")]
+        public async Task<IActionResult> MarkAsFavorite(string userId,int recipeId)
+        {
+            FavoriteRecipe favoriteRecipe = await _context.FavoriteRecipes
+                .FirstOrDefaultAsync(x => x.User.Id == userId && x.Recipe.Id == recipeId);
+
+            if (favoriteRecipe != null) {
+                _context.FavoriteRecipes.Remove(favoriteRecipe);
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            else
+            {
+                User user = await _context.Users
+               .FirstOrDefaultAsync(x => x.Id == userId);
+
+                Recipe recipe = await _context.Recipes
+               .Include(x => x.Ingredients)
+               .Include(x => x.Steps)
+               .Include(x => x.User)
+               .FirstOrDefaultAsync(x => x.Id == recipeId);
+                 
+                FavoriteRecipe newFavoriteRecipe = new FavoriteRecipe { Id=0, User=user ,Recipe=recipe};
+                _context.FavoriteRecipes.Add(newFavoriteRecipe);
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------
+        [HttpPost]
+        [Route("FavoritesByUser/{userId}")]
+        public async Task<IActionResult> FavoritesByUser(string userId)
+        {
+            List<FavoriteRecipe> favoriteRecipes = await _context.FavoriteRecipes
+                 
+                 .Where(x => x.User.Id == userId)
+               .ToListAsync();
+
+            List<FavoriteRecipeViewModel> favoriteRecipesViewModel = new List<FavoriteRecipeViewModel>();
+
+            foreach (FavoriteRecipe favoriteRecipe in favoriteRecipes)
+            {
+                FavoriteRecipeViewModel favoriteRecipeViewModel = new FavoriteRecipeViewModel
+                {
+                    Id = favoriteRecipe.Id,
+                    RecipeId = favoriteRecipe.Recipe.Id,
+                    UserId = favoriteRecipe.User.Id
+                };
+                favoriteRecipesViewModel.Add(favoriteRecipeViewModel);
+            }
+
+            return Ok(favoriteRecipesViewModel);
+
         }
     }
 }
