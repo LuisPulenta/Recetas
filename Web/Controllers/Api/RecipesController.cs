@@ -226,6 +226,8 @@ namespace Recetas.Web.Controllers.Api
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipe(int id)
         {
+           
+            //Busca la Receta
             Recipe recipe = await _context.Recipes
                .Include(x => x.Ingredients)
                .Include(x => x.Steps)
@@ -236,18 +238,35 @@ namespace Recetas.Web.Controllers.Api
                 return NotFound();
             }
 
+            //Borra la Receta de los Favoritos para todos los Usuarios
+            List<FavoriteRecipe> favoriteRecipes = await _context.FavoriteRecipes
+                 .Include(x => x.Recipe)
+                .Include(x => x.User)
+
+                  .Where(x => x.Recipe.Id == id)
+                .ToListAsync();
+
+            foreach (FavoriteRecipe favoriteRecipe in favoriteRecipes)
+            {
+                _context.FavoriteRecipes.Remove(favoriteRecipe);
+                await _context.SaveChangesAsync();
+            }
+
+            //Borra los ingredientes
             foreach (Ingredient ingredient in recipe.Ingredients)
             {
                 _context.Ingredients.Remove(ingredient);
                 await _context.SaveChangesAsync();
             }
 
+            //Borra los pasos
             foreach (Step step in recipe.Steps)
             {
                 _context.Steps.Remove(step);
                 await _context.SaveChangesAsync();
-            }            
+            }
 
+            //Borra la Receta
             _context.Recipes.Remove(recipe);
             await _context.SaveChangesAsync();
 
